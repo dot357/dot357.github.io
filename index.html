@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dot357</title>
+    <meta name="theme-color" content="#000000">
+
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.js" integrity="sha512-NLtnLBS9Q2w7GKK9rKxdtgL7rA7CAS85uC/0xd9im4J/yOL4F9ZVlv634NAM7run8hz3wI2GabaA6vv8vJtHiQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+
+<script src="http://threejs.org/examples/js/loaders/MTLLoader.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js" integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+
+
+
+
+
+</head>
+
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+   
+  </style>
+  <body>
+   
+
+  
+
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
+    <script type="module">
+      // Find the latest version by visiting https://cdn.skypack.dev/three.
+
+      import { GUI } from 'https://cdn.skypack.dev/three/examples/jsm/libs/lil-gui.module.min.js';
+      import { OrbitControls } from "https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js";
+      import { OBJLoader } from "https://cdn.skypack.dev/three/examples/jsm/loaders/OBJLoader.js";
+      import { MTLLoader } from "https://cdn.skypack.dev/three/examples/jsm/loaders/MTLLoader.js";
+      import { EffectComposer } from 'https://cdn.skypack.dev/three/examples/jsm/postprocessing/EffectComposer.js';
+      import { RenderPass } from 'https://cdn.skypack.dev/three/examples/jsm/postprocessing/RenderPass.js';
+      import { UnrealBloomPass } from 'https://cdn.skypack.dev/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+      
+      
+      
+      const params = {
+				exposure: 1,
+				bloomStrength: 1.5,
+				bloomThreshold: 0,
+				bloomRadius: 0
+			};
+
+      let scene, camera, renderer, controls;
+      let yValue;
+
+function init() {
+  var manager = new THREE.LoadingManager();
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000000);
+  camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    1,
+    5000
+  );
+  camera.position.set(-35, 25, 50);
+ 
+  
+/*
+scene.add( new THREE.AxesHelper(-500));
+  scene.add(new THREE.AxesHelper(500)); 
+  */
+ 
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  //sets the image hd as posible
+  renderer.setPixelRatio(window.devicePixelRatio * 1.5);
+  //console.log(renderer)
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  controls = new OrbitControls( camera, renderer.domElement );
+
+
+  //ambient light
+ var ambientLight = new THREE.AmbientLight( 0xf0fdff, 0.3 );
+ 
+  scene.add( ambientLight );
+  
+
+  let hemiLight = new THREE.HemisphereLight(0xfffffff, 0x080820, 0.3);
+scene.add(hemiLight);
+
+let light = new THREE.SpotLight(0x006336,2);
+let light2 = new THREE.SpotLight(0x001548,6);
+light.position.set(0,55,50);
+light.castShadow = true;
+light2.position.set(1000,10,-20);
+light2.castShadow = true;
+
+const geometry = new THREE.SphereGeometry( 2, 32, 16 );
+const material = new THREE.MeshBasicMaterial( { color: 0x000 } );
+const sphere = new THREE.Mesh( geometry, material );
+//scene.add( sphere );
+
+sphere.position.set(0,0,0)
+
+scene.add( light,light2 );
+console.log(scene)
+scene.castShadow = true
+  
+window.onmousemove = (e) => {
+  //console.log(e.clientX, e.clientY);
+  //gsap.to(sphere.position, {x: e.clientX/10, y: 13, z: -e.clientX/10},0);
+  
+  gsap.to(light2.position, {x: e.clientX, y: e.clientY, z: 0},0);
+  gsap.to(light.position, {x: -e.clientX, y: e.clientY, z: 0}, 0);
+
+  
+}
+
+controls.enablePan = false;
+controls.minDistance =55;
+controls.maxDistance =65;
+
+
+  
+
+
+
+
+
+
+
+const mtlLoader = new MTLLoader()
+mtlLoader.load(
+    'object/model.mtl',
+    (materials) => {
+        materials.preload()
+        console.log(materials)
+         const objLoader = new OBJLoader()
+         objLoader.setMaterials(materials)
+         objLoader.load(
+             'object/model.obj',
+             (object) => {
+                object.scale.x=100
+                object.scale.y=100
+                object.scale.z=100
+
+                object.rotation.y=-0.7
+                
+              
+                scene.add(object)
+             },
+             (xhr) => {
+                 //console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+             },
+             (error) => {
+                 console.log('An error happened')
+             }
+         )
+    },
+    (xhr) => {
+       // console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log(error)
+        console.log('An error happened')
+    }
+)
+      
+
+    
+
+
+
+
+
+animate();
+
+            
+
+ 
+}
+
+function animate() {
+
+scene.rotation.y += 0.0005
+
+ 
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+
+
+
+
+
+
+
+
+
+init();
+      
+
+
+
+
+           
+
+          
+    </script>
+  </body>
+</html>
